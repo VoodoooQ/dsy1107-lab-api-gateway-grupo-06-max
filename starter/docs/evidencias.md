@@ -1,9 +1,10 @@
 # Evidencias · Laboratorio API Gateway
 
 ## Integrantes
-- Nombre:
-- Nombre:
-- Nombre:
+- Nombre:Maximiliano Diaz
+- Nombre:Rodrigo Cruz
+- Nombre:Felipe Farias
+- Nombre:Mario Jaramillo
 
 ## 1. Backend directo
 
@@ -11,13 +12,18 @@ Antes de utilizar el gateway, registrar las pruebas directas contra JSONPlacehol
 
 | Método | URL | Status | Observación |
 |---|---|---:|---|
-| GET | `https://jsonplaceholder.typicode.com/posts` | | |
-| GET | `https://jsonplaceholder.typicode.com/posts/1` | | |
+| GET | `https://jsonplaceholder.typicode.com/posts` | 200| Se obtiene directamente la colección de posts desde JSONPlaceholder. |
+
+![alt text](image.png)
+
+| GET | `https://jsonplaceholder.typicode.com/posts/1` | 200 | Se obtiene directamente el recurso identificado con id 1. |
+
+![alt text](image-1.png)
 
 **¿Qué información del backend conoce el cliente en este escenario?**
 
 Respuesta:
-
+**El cliente conoce directamente la dirección del backend https://jsonplaceholder.typicode.com. Esto genera acoplamiento entre el cliente y la ubicación del servicio. Si existieran múltiples servicios o el backend cambiara de ubicación, los clientes tendrían que conocer y actualizar directamente esas direcciones. El API Gateway permite abstraer el backend detrás de un punto de entrada común.**
 ---
 
 ## 2. Arquitectura final
@@ -36,20 +42,57 @@ flowchart LR
     G --> WEB
     G --> P
 ```
-
-Explicar brevemente qué responsabilidad cumple cada componente.
-
+```
+Cliente web :5500: Página web que hace las solicitudes y muestra la información recibida. Postman: Herramienta usada para probar las solicitudes y revisar las respuestas. Spring Cloud Gateway :8080: Recibe las solicitudes y las envía al backend correcto. JSONPlaceholder: Servicio que entrega los datos solicitados, por ejemplo los posts.
+```
 ---
 
 ## 3. Pruebas HTTP mediante gateway
 
 | Método | URL | Status | Headers relevantes | Interpretación |
 |---|---|---:|---|---|
-| GET | `/api/v1/posts` | | | colección |
-| GET | `/api/v1/posts/1` | | | recurso individual |
-| POST | `/api/v1/posts` | | | creación simulada |
-| PUT | `/api/v1/posts/1` | | | actualización simulada |
-| DELETE | `/api/v1/posts/1` | | | eliminación simulada |
+| GET | `/api/v1/posts` | 200 | | colección |
+
+![alt text](image-2.png)
+
+| GET | `/api/v1/posts/1` | 200 | | recurso individual |
+
+![alt text](image-3.png)
+
+| POST | `/api/v1/posts` | 201 | `Content-Type: application/json` | creación simulada |
+
+### Body enviado en POST
+
+```json
+{
+  "title": "Cloud Native",
+  "body": "Laboratorio API Gateway",
+  "userId": 1
+}
+```
+
+![alt text](image-4.png)
+
+
+| PUT | `/api/v1/posts/1` | 200| `Content-Type: application/json` | actualización simulada |
+
+### Body enviado en PUT
+
+```json
+{
+  "id": 1,
+  "title": "Cloud Native actualizado",
+  "body": "Prueba PUT mediante gateway",
+  "userId": 1
+}
+```
+![alt text](image-5.png)
+
+
+
+| DELETE | `/api/v1/posts/1` | 200 | | eliminación simulada |
+
+![alt text](image-6.png)
 
 Para POST y PUT incluir también el body enviado.
 
@@ -57,12 +100,14 @@ Para POST y PUT incluir también el body enviado.
 
 ## 4. Routing
 
-- URL solicitada por el cliente:
-- `id` de la route:
-- predicate que hizo match:
-- URI/integration configurada:
-- path recibido finalmente por el backend:
-- función de `RewritePath`:
+
+
+- URL solicitada por el cliente: `http://localhost:8080/api/v1/posts/1`
+- `id` de la route: `posts-v1`
+- predicate que hizo match: `Path=/api/v1/posts/**`
+- URI/integration configurada: `https://jsonplaceholder.typicode.com`
+- path recibido finalmente por el backend: `/posts/1`
+- función de `RewritePath`: eliminar el prefijo público `/api/v1/` antes de reenviar la solicitud al backend. En este caso transforma `/api/v1/posts/1` en `/posts/1`.
 
 ### Recorrido de una petición
 
@@ -71,6 +116,16 @@ Explicar con sus palabras:
 ```text
 cliente → gateway → backend → gateway → cliente
 ```
+
+```
+El cliente le pide información al Gateway usando la dirección http://localhost:8080/api/v1/posts/1. 
+El Gateway recibe la petición y revisa la dirección. Como esta coincide con la ruta de posts, sabe que debe enviarla al servicio correspondiente. 
+Antes de enviarla, el Gateway cambia la dirección de /api/v1/posts/1 a /posts/1. Luego, manda esa petición a https://jsonplaceholder.typicode.com/posts/1. 
+El servidor responde con la información solicitada. 
+El Gateway recibe esa respuesta y se la entrega nuevamente al cliente.
+En resumen: el cliente le pide la información al Gateway, el Gateway la busca en el servidor correspondiente y después le devuelve la respuesta al cliente.
+```
+
 
 ---
 
@@ -130,7 +185,7 @@ Responder:
 
 ## 8. Richardson Maturity Model nivel 2
 
-Explicar qué elementos observados en el laboratorio permiten afirmar que la API utiliza recursos, métodos HTTP y status codes con semántica HTTP.
+El laboratorio permite afirmar que la API trabaja al menos en el nivel 2 del Richardson Maturity Model porque utiliza recursos identificables, métodos HTTP con significado y códigos de estado HTTP. La colección se representa mediante /api/v1/posts y un recurso individual mediante /api/v1/posts/1. Para interactuar con estos recursos se utilizan métodos como GET para consultar, POST para simular una creación, PUT para simular una actualización y DELETE para simular una eliminación. Además, cada operación devuelve un status HTTP que comunica el resultado de la petición.
 
 ---
 
