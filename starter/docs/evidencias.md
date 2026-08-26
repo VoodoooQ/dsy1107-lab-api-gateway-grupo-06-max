@@ -181,28 +181,42 @@ Debido a que el starter usa Spring Cloud Gateway Server Web MVC, default-filters
 ### Antes de configurar CORS
 
 - URL del cliente web: `http://localhost:5500`
-- Endpoint consultado:
-- Resultado visible:
-- Mensaje relevante en Console/Network:
+- Endpoint consultado: `http://localhost:8080/api/v1/posts/1`
+- Resultado visible: La petición se realizó correctamente y el cliente mostró `HTTP 200` junto con el contenido JSON del recurso solicitado.
+- Mensaje relevante en Console/Network: La petición no fue bloqueada por CORS. En los headers de respuesta se observó `Access-Control-Allow-Origin: http://localhost:5500`, aun cuando la configuración CORS local del Gateway se encontraba deshabilitada.
+
+**Nota:** En esta prueba no se produjo el bloqueo esperado antes de habilitar CORS, ya que el backend JSONPlaceholder entrega headers CORS en sus respuestas y estos son reenviados por el Gateway.
+
 
 ### Después de configurar CORS
 
 - Resultado visible:
-- `Access-Control-Allow-Origin`:
-- `Access-Control-Allow-Methods`:
+![alt text](image-11.png)
+- Resultado visible: La petición se realizó correctamente y el cliente mostró `HTTP 200` junto con el contenido JSON del recurso solicitado.
+- `Access-Control-Allow-Origin`: `http://localhost:5500`
+- `Access-Control-Allow-Methods`: No se observa en la respuesta GET normal; se verificará mediante la solicitud preflight `OPTIONS`.
+## Nota 3:
+se detecta presencia de headers dublicados.
 
 ### Preflight OPTIONS
 
-- Request utilizado:
-- Status:
+- Request utilizado: `OPTIONS http://localhost:8080/api/v1/posts`
+- Status: `200`
 - Headers relevantes:
+  - `Access-Control-Allow-Origin: http://localhost:5500`
+  - `Access-Control-Allow-Methods: GET,POST,PUT,DELETE,OPTIONS`
+  - `Access-Control-Max-Age: 1800`
 
 Responder:
 
 1. ¿Por qué Postman puede funcionar cuando el navegador falla?
+Postman puede realizar solicitudes porque no aplica la Same-Origin Policy de los navegadores. En cambio, el navegador controla las solicitudes entre orígenes diferentes mediante CORS y puede bloquear el acceso a la respuesta si los headers CORS no son válidos.
 2. ¿Qué es un preflight?
+Un preflight es una solicitud HTTP OPTIONS que el navegador puede realizar antes de la petición real para comprobar si el servidor permite el origen, el método HTTP y los headers que se desean utilizar.
 3. ¿CORS autentica o autoriza usuarios?
+No. CORS no autentica usuarios ni determina qué permisos tienen. Su función es controlar desde qué orígenes web el navegador permite acceder a un recurso.
 4. ¿Qué riesgo tendría permitir cualquier origen sin analizar el contexto?
+Permitir cualquier origen podría permitir que aplicaciones web no previstas consuman la API desde un navegador. Por esta razón, los orígenes permitidos deben definirse de acuerdo con los clientes que realmente necesitan acceder al servicio.
 
 ---
 
