@@ -244,11 +244,20 @@ La tabla pide clasificar donde corresponde cada responsabilidad arquitectonicame
 
 ---
 
+
 ## 10. Problemas encontrados
 
-1. Problema:
-   - causa:
-   - solución:
+1. Problema: El header transversal `X-Gateway-Lab` no se aplicaba utilizando `default-filters`.
+   - causa: El starter utiliza Spring Cloud Gateway Server Web MVC y la configuración `default-filters` indicada para la variante WebFlux no se aplicaba de la misma manera.
+   - solución: Se agregó `AddResponseHeader=X-Gateway-Lab, DSY1107` explícitamente en las rutas v1 y v2, manteniendo el mismo comportamiento en ambas.
+
+2. Problema: Antes de habilitar CORS en el Gateway, la petición desde el navegador funcionaba igualmente.
+   - causa: JSONPlaceholder ya enviaba headers CORS en sus respuestas y el Gateway los reenviaba al cliente.
+   - solución: Se registró el comportamiento observado y se continuó con la configuración CORS del Gateway para analizar el resultado real del laboratorio.
+
+3. Problema: Al habilitar CORS en el Gateway, el navegador comenzó a bloquear la petición con `TypeError: Failed to fetch`.
+   - causa: Tanto JSONPlaceholder como el Gateway agregaban `Access-Control-Allow-Origin: http://localhost:5500`, produciendo el header duplicado y una respuesta CORS inválida para el navegador.
+   - solución: Se agregó `RemoveRequestHeader=Origin` en las rutas del Gateway para evitar que el header `Origin` fuese reenviado a JSONPlaceholder. De esta manera, la política CORS quedó controlada por el Gateway y la respuesta pasó a contener un único `Access-Control-Allow-Origin`.
 
 ---
 
@@ -264,8 +273,18 @@ Agregar enlaces a los Pull Requests.
 
 ## 12. Conclusiones
 
+## 12. Conclusiones
+
 - ¿Qué problema resolvió el gateway?
+
+El API Gateway permitió entregar un punto de entrada común para los clientes, evitando que estos tuvieran que conocer directamente la ubicación del backend. Además, permitió centralizar aspectos como el routing, la transformación de rutas, el versionado de la API, la incorporación de headers y la configuración CORS.
+
 - ¿Qué concepto del laboratorio sería equivalente al trabajar posteriormente con Amazon API Gateway?
+
+El concepto equivalente sería utilizar Amazon API Gateway como punto de entrada para definir rutas y métodos HTTP, conectar esas rutas con servicios backend y aplicar políticas transversales sobre las solicitudes y respuestas.
+
 - ¿Qué aprendió el grupo que no depende específicamente de Spring Cloud Gateway?
+
+Se aprendió que conceptos como routing, versionado de APIs, métodos y status HTTP, CORS, separación de responsabilidades y uso de un Gateway como intermediario son principios de arquitectura de APIs que pueden aplicarse independientemente de la tecnología utilizada para implementarlos.
 
 
