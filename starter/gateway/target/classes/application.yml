@@ -4,30 +4,33 @@ server:
 spring:
   application:
     name: dsy1107-api-gateway-lab
+
   cloud:
     gateway:
       server:
         webmvc:
-          routes:
-            - id: posts-v1
-              uri: https://jsonplaceholder.typicode.com
-              predicates:
-                - Path=/api/v1/posts/**
-                
 
-              filters:
-                - RewritePath=/api/v1/(?<segment>.*), /$\{segment}
-                - AddResponseHeader=X-API-Version, v1
-
-            - id: posts-v2
-              uri: https://jsonplaceholder.typicode.com
-              predicates:
-              - Path=/api/v2/posts/**
+           routes:
+             - id: posts-v1
+               uri: https://jsonplaceholder.typicode.com
+               predicates:
+               - Path=/api/v1/posts/**
 
 
-              filters:
-                - RewritePath=/api/v2/(?<segment>.*), /$\{segment}
-                - AddResponseHeader=X-API-Version, v2
+               filters:
+                 - RewritePath=/api/v1/(?<segment>.*), /$\{segment}
+                 - AddResponseHeader=X-API-Version, v1
+                 - AddResponseHeader=X-Gateway-Lab, DSY1107
+
+             - id: posts-v2
+               uri: https://jsonplaceholder.typicode.com
+               predicates:
+               - Path=/api/v2/posts/**
+
+               filters:
+                 - RewritePath=/api/v2/(?<segment>.*), /$\{segment}
+                 - AddResponseHeader=X-API-Version, v2
+                 - AddResponseHeader=X-Gateway-Lab, DSY1107
 
 lab:
   cors:

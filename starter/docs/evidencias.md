@@ -159,9 +159,20 @@ No. El versionado del contrato público define las rutas y comportamiento que se
 
 ## 6. Header transversal
 
+-Header v1
+![alt text](image-9.png)
+
+-Header v2
+![alt text](image-10.png)
+
 - Header esperado: `X-Gateway-Lab: DSY1107`
-- Evidencia observada:
+- Evidencia observada: las peticiones `GET /api/v1/posts/1` y `GET /api/v2/posts/1` devuelven el header `X-Gateway-Lab: DSY1107`.
 - ¿Por qué este comportamiento puede considerarse transversal?:
+Se considera transversal porque corresponde a un comportamiento del Gateway que se aplica de manera uniforme a las distintas rutas y no forma parte de la lógica de negocio del backend. En este laboratorio, tanto v1 como v2 incorporan el mismo header X-Gateway-Lab: DSY1107.
+
+## Nota: 
+Debido a que el starter usa Spring Cloud Gateway Server Web MVC, default-filters no se aplica como en WebFlux. Por ello, X-Gateway-Lab: DSY1107 se agregó explícitamente en ambas rutas para mantener el comportamiento transversal solicitado.
+
 
 ---
 
@@ -203,16 +214,19 @@ El laboratorio permite afirmar que la API trabaja al menos en el nivel 2 del Ric
 
 ## 9. Responsabilidades
 
-| Responsabilidad | Cliente | Gateway | Backend | Justificación |
-|---|:---:|:---:|:---:|---|
-| routing | | | | |
-| lógica de negocio | | | | |
-| autenticación/autorización | | | | |
-| transformación de rutas | | | | |
-| persistencia | | | | |
-| rate limiting | | | | |
-| reglas de negocio | | | | |
-| observabilidad | | | | |
+| Responsabilidad            | Cliente | Gateway | Backend | Justificación                                                                                                                         |
+| -------------------------- | :-----: | :-----: | :-----: | ------------------------------------------------------------------------------------------------------------------------------------- |
+| routing                    |         |    X    |         | El Gateway decide a qué servicio o integración enviar cada solicitud según las rutas configuradas.                                    |
+| lógica de negocio          |         |         |    X    | La lógica propia de la aplicación debe mantenerse en el backend y no en el Gateway.                                                   |
+| autenticación/autorización |         |    X    |    X    | Puede centralizarse parcialmente en el Gateway, aunque el backend también puede validar permisos según la arquitectura.               |
+| transformación de rutas    |         |    X    |         | El Gateway modifica el path mediante filtros como `RewritePath` antes de reenviar la solicitud.                                       |
+| persistencia               |         |         |    X    | El almacenamiento y manejo de los datos corresponde al backend.                                                                       |
+| rate limiting              |         |    X    |         | Es una política transversal que puede aplicarse en el Gateway para limitar solicitudes antes de que lleguen al backend.               |
+| reglas de negocio          |         |         |    X    | Las decisiones propias del dominio y del funcionamiento de la aplicación corresponden al backend.                                     |
+| observabilidad             |         |    X    |    X    | El Gateway puede registrar y observar el tráfico general, mientras que el backend puede generar métricas y logs propios del servicio. |
+
+## Nota 2:
+La tabla pide clasificar donde corresponde cada responsabilidad arquitectonicamente.
 
 ---
 
@@ -239,3 +253,5 @@ Agregar enlaces a los Pull Requests.
 - ¿Qué problema resolvió el gateway?
 - ¿Qué concepto del laboratorio sería equivalente al trabajar posteriormente con Amazon API Gateway?
 - ¿Qué aprendió el grupo que no depende específicamente de Spring Cloud Gateway?
+
+
