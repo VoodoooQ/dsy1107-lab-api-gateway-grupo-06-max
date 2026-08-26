@@ -131,17 +131,29 @@ En resumen: el cliente le pide la información al Gateway, el Gateway la busca e
 
 ## 5. Versionado
 
-- Evidencia `/api/v1`:
-- Header `X-API-Version` observado:
-- Evidencia `/api/v2`:
-- Header `X-API-Version` observado:
+- Evidencia `/api/v1`: petición `GET http://localhost:8080/api/v1/posts/1` ejecutada correctamente.
+
+![alt text](image-7.png)
+
+- Header `X-API-Version` observado: ``v1`
+
+- Evidencia `/api/v2`: petición `GET http://localhost:8080/api/v2/posts/1` ejecutada correctamente.
+
+![alt text](image-8.png)
+
+- Header `X-API-Version` observado: `v2`
+
 
 Responder:
 
 1. ¿Por qué mantener v1 y v2 simultáneamente?
+Para permitir que los consumidores actuales continúen utilizando v1 mientras nuevos consumidores o aplicaciones pueden adoptar v2. Esto permite introducir cambios sin interrumpir inmediatamente a quienes dependen de la versión anterior.
 2. ¿Qué consumidores podrían seguir usando v1?
+Los clientes o aplicaciones que fueron desarrollados utilizando el contrato de v1 y que todavía no han sido actualizados para consumir v2.
 3. ¿Cuándo retirarían una versión?
+Una versión podría retirarse cuando sus consumidores hayan migrado a una versión más reciente y exista un proceso previamente comunicado para dejar de soportarla.
 4. ¿Versionar el contrato público es lo mismo que versionar el servidor desplegado?
+No. El versionado del contrato público define las rutas y comportamiento que se exponen a los consumidores, mientras que el versionado del servidor corresponde al software o despliegue que implementa esos servicios. En este laboratorio, v1 y v2 son contratos públicos diferentes aunque ambas rutas utilicen actualmente el mismo backend.
 
 ---
 
