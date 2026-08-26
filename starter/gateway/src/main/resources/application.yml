@@ -21,6 +21,7 @@ spring:
                  - RewritePath=/api/v1/(?<segment>.*), /$\{segment}
                  - AddResponseHeader=X-API-Version, v1
                  - AddResponseHeader=X-Gateway-Lab, DSY1107
+                 - RemoveRequestHeader=Origin
 
              - id: posts-v2
                uri: https://jsonplaceholder.typicode.com
@@ -31,8 +32,9 @@ spring:
                  - RewritePath=/api/v2/(?<segment>.*), /$\{segment}
                  - AddResponseHeader=X-API-Version, v2
                  - AddResponseHeader=X-Gateway-Lab, DSY1107
+                 - RemoveRequestHeader=Origin
 
 lab:
   cors:
-    enabled: false
+    enabled: true
     allowed-origin: http://localhost:5500
